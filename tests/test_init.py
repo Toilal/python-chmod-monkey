@@ -51,7 +51,7 @@ def test_with_mode_missing_file(tmpdir):
 
     os.chmod(filepath, 0o444)
 
-    with pytest.raises(FileNotFoundError):
+    with pytest.raises(Exception):
         with tmp_chmod(filepath + '-another', '+w') as (new_mode, old_mode, exc):
             pass
 
@@ -64,7 +64,7 @@ def test_with_mode_missing_file_no_raise(tmpdir):
     with tmp_chmod(filepath + '-another', '+w', exception_in_context=True) as (new_mode, old_mode, exc):
         assert new_mode is None
         assert old_mode is None
-        assert isinstance(exc, FileNotFoundError)
+        assert isinstance(exc, Exception)
 
 
 @pytest.mark.parametrize('mode,expected', [
