@@ -3,23 +3,46 @@ Add support for `os.chmod('script.sh', 'ug+x')` syntax style.
 """
 
 import os
+from contextlib import contextmanager
 
 from .parser import parse
 
 _default_chmod = None  # pylint:disable=invalid-name
 
 
-def to_mode(filepath, mode_str):
+def to_mode(filepath, mode_str, return_old_mode=False):
     """
     Convert a string based mode to a bitmask mode ready to give to os.chmod.
     :param filepath:
     :param mode_str:
+    :param return_old_mode:
     :return:
     """
     mode = None
+    old_mode = None
     for parsed in parse(mode_str):
-        mode = parsed.to_mode(filepath, mode)
+        mode = parsed.to_mode(filepath, mode, return_old_mode=return_old_mode and old_mode is None)
+        if isinstance(mode, tuple):
+            mode, old_mode = mode
+    if return_old_mode:
+        return mode, old_mode
     return mode
+
+
+@contextmanager
+def tmp_chmod(filepath, mode_str):
+    """
+    Temporary change file mode in a context manager.
+    :param filepath:
+    :param mode_str:
+    """
+
+    new_mode, old_mode = to_mode(filepath, mode_str, return_old_mode=True)
+    os.chmod(filepath, new_mode)
+    try:
+        yield new_mode
+    finally:
+        os.chmod(filepath, old_mode)
 
 
 def install():

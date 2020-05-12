@@ -44,3 +44,18 @@ from chmod_monkey import to_mode
 
 os.chmod('script.sh', to_mode('script.sh', 'ug+x'))  # For serious people.
 ```
+
+## Other features
+
+### Context manager
+
+You may use the following syntax to temporary change a file mode.
+
+```python
+from chmod_monkey import tmp_chmod
+
+with tmp_chmod('script.sh', "+w"):
+    pass # File permissions are modified in this block only
+# File permissions are restored here
+
+```

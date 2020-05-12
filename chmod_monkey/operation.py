@@ -59,11 +59,12 @@ class Operation(object):
                 return TARGET_MODE_COPY
         return None
 
-    def to_mode(self, filepath=None, mode=None):
+    def to_mode(self, filepath=None, mode=None, return_old_mode=False):
         """
         Converts the operation to mode ready to apply with os.chmod
         :param filepath: actual filepath. Used to get actual mode if not given.
         :param mode: actual mode.
+        :param return_old_mode: If true, return will be a tuple (new_mode, old_mode)
         """
         if self.operator != '=':
             if mode is None:
@@ -75,12 +76,15 @@ class Operation(object):
             mode = 0
 
         if self.target_mode == TARGET_MODE_FLAGS:
-            return self._flags_to_mode(mode)
-        if self.target_mode == TARGET_MODE_COPY:
-            return self._copy_to_mode(mode)
-        if self.target_mode == TARGET_MODE_BITS:
-            return self._bits_to_mode(mode)
-        raise ValueError("Target mode value is invalid (%i)" % (self.target_mode,))
+            new_mode = self._flags_to_mode(mode)
+        elif self.target_mode == TARGET_MODE_COPY:
+            new_mode = self._copy_to_mode(mode)
+        elif self.target_mode == TARGET_MODE_BITS:
+            new_mode = self._bits_to_mode(mode)
+        else:
+            raise ValueError("Target mode value is invalid (%i)" % (self.target_mode,))
+
+        return new_mode if not return_old_mode else (new_mode, mode)
 
     def _flags_to_mode(self, mode):
         for source in self.source:
