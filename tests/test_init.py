@@ -38,9 +38,33 @@ def test_with_mode(tmpdir):
     open(filepath, 'w').close()
 
     os.chmod(filepath, 0o444)
-    with tmp_chmod(filepath, '+w'):
+    with tmp_chmod(filepath, '+w') as (new_mode, old_mode):
         assert stat.S_IMODE(os.lstat(filepath).st_mode) == int('666', 8)
+        assert new_mode == int('666', 8)
+        assert old_mode == int('444', 8)
     assert stat.S_IMODE(os.lstat(filepath).st_mode) == int('444', 8)
+
+
+def test_with_mode_missing_file(tmpdir):
+    filepath = os.path.join(str(tmpdir), "test")
+    open(filepath, 'w').close()
+
+    os.chmod(filepath, 0o444)
+
+    with pytest.raises(FileNotFoundError):
+        with tmp_chmod(filepath + '-another', '+w') as (new_mode, old_mode, exc):
+            pass
+
+
+def test_with_mode_missing_file_no_raise(tmpdir):
+    filepath = os.path.join(str(tmpdir), "test")
+    open(filepath, 'w').close()
+
+    os.chmod(filepath, 0o444)
+    with tmp_chmod(filepath + '-another', '+w', exception_in_context=True) as (new_mode, old_mode, exc):
+        assert new_mode is None
+        assert old_mode is None
+        assert isinstance(exc, FileNotFoundError)
 
 
 @pytest.mark.parametrize('mode,expected', [

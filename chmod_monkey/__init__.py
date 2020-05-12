@@ -30,19 +30,31 @@ def to_mode(filepath, mode_str, return_old_mode=False):
 
 
 @contextmanager
-def tmp_chmod(filepath, mode_str):
+def tmp_chmod(filepath, mode_str, exception_in_context=False):
     """
     Temporary change file mode in a context manager.
     :param filepath:
     :param mode_str:
+    :param exception_in_context: If true, no exception will be raised, but it will be added in context tuple.
     """
 
-    new_mode, old_mode = to_mode(filepath, mode_str, return_old_mode=True)
-    os.chmod(filepath, new_mode)
+    new_mode = None
+    old_mode = None
     try:
-        yield new_mode
-    finally:
-        os.chmod(filepath, old_mode)
+        new_mode, old_mode = to_mode(filepath, mode_str, return_old_mode=True)
+        os.chmod(filepath, new_mode)
+        try:
+            if exception_in_context:
+                yield new_mode, old_mode, None
+            else:
+                yield new_mode, old_mode
+        finally:
+            os.chmod(filepath, old_mode)
+    except Exception as exc:  # pylint:disable=broad-except
+        if exception_in_context:
+            yield new_mode, old_mode, exc
+        else:
+            raise
 
 
 def install():

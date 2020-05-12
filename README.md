@@ -57,5 +57,4 @@ from chmod_monkey import tmp_chmod
 with tmp_chmod('script.sh', "+w"):
     pass # File permissions are modified in this block only
 # File permissions are restored here
-
 ```
