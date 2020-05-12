@@ -1,7 +1,7 @@
 History
 =======
 
-1.1.1 (unreleased)
+1.1.1 (2020-05-12)
 ------------------
 
 - Add `exception_in_context` option to `tmp_chmod` and more data in context manager.
