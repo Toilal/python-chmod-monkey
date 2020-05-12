@@ -42,5 +42,5 @@ import os
 
 from chmod_monkey import to_mode
 
-os.chmod('script.sh', to_mode('ug+x'))  # For serious people.
+os.chmod('script.sh', to_mode('script.sh', 'ug+x'))  # For serious people.
 ```
